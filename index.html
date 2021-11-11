@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Unity WebGL Player | cubeAnimation</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico" />
+    <link rel="stylesheet" href="TemplateData/style.css" />
+  </head>
+  <body>
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width="960" height="600"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-mobile-warning">
+        WebGL builds are not supported on mobile devices.
+      </div>
+      <div id="unity-footer">
+        <div id="unity-webgl-logo"></div>
+        <div id="unity-fullscreen-button"></div>
+        <div id="unity-build-title">cubeAnimation</div>
+      </div>
+    </div>
+    <script>
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/CubeInteraction.loader.js";
+      var config = {
+        dataUrl: buildUrl + "/CubeInteraction.data",
+        frameworkUrl: buildUrl + "/CubeInteraction.framework.js",
+        codeUrl: buildUrl + "/CubeInteraction.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "Faze",
+        productName: "cubeAnimation",
+        productVersion: "0.2",
+      };
+
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var fullscreenButton = document.querySelector("#unity-fullscreen-button");
+      var mobileWarning = document.querySelector("#unity-mobile-warning");
+
+      // By default Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        container.className = "unity-mobile";
+        // Avoid draining fillrate performance on mobile devices,
+        // and default/override low DPI mode on mobile browsers.
+        config.devicePixelRatio = 1;
+        mobileWarning.style.display = "block";
+        setTimeout(() => {
+          mobileWarning.style.display = "none";
+        }, 5000);
+      } else {
+        canvas.style.width = "960px";
+        canvas.style.height = "600px";
+      }
+      loadingBar.style.display = "block";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          progressBarFull.style.width = 100 * progress + "%";
+        })
+          .then((unityInstance) => {
+            var obj = {
+              element1: {
+                player_name: "MS Dhoni",
+                moment_length: "0:20",
+                border_color: "#25AAF7",
+                rarity: "EPIC",
+                image_url:
+                  "https://prod-asset.faze.app/Monochrome%20Images/Dhoni.jpeg",
+                video_url:
+                  "https://homepagecontent.s3.amazonaws.com/video/Dhoni%20Finishes%20off%20in%20style.mp4",
+                video_thumbnail:
+                  "http://prod-asset.faze.app/Video%20Thumbnail/MS%20Dhoni.jpg",
+              },
+              element2: {
+                action_type: "SIX",
+                image_url:
+                  "https://prod-asset.faze.app/Surface%203%20Background/SquareBGGenesisRev1.png",
+                moment_date: "APR 2, 2011",
+                team_name: "IND",
+              },
+              element3: {
+                player_jersey: 7,
+              },
+              element4: {
+                score: "SL 274/6(50) v Ind 277/4(48.2)",
+                image_url:
+                  "https://prod-asset.faze.app/Packs/CosmicPackNoLabel.png",
+              },
+              element5: {
+                federation_image_url: "https://prod-asset.faze.app/ICC%20Logo",
+                flag_image_url: "https://prod-asset.faze.app/Flags/India.png",
+                copyright_info:
+                  "2021 Faze Technologies Inc.\nAll Rights Reserved.\nOfficially licensed product of International Cricket Council.",
+                audio_enable: "TRUE",
+                audio_url:
+                  "https://prod-asset.faze.app/Sreesanth%20Audio.mp3?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA2JXJWEA7EZ76HYUD/20211029/us-east-2/s3/aws4_request&X-Amz-Date=20211029T070407Z&X-Amz-Expires=604798&X-Amz-SignedHeaders=host&X-Amz-Signature=5cc556695e7b9d3003e8458d56162ee46c3ae4131c0e1d0ad64c9259df9e8f43",
+                file_name: "Dhoni Genesis",
+              },
+            };
+            var returnStr = JSON.stringify(obj);
+            unityInstance.SendMessage(
+              "DataUploader",
+              "GetFromJavaScript",
+              returnStr
+            );
+            loadingBar.style.display = "none";
+            fullscreenButton.onclick = () => {
+              unityInstance.SetFullscreen(1);
+            };
+          })
+          .catch((message) => {
+            alert(message);
+          });
+      };
+      document.body.appendChild(script);
+    </script>
+  </body>
+</html>
